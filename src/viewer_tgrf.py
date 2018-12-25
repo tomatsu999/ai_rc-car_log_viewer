@@ -81,7 +81,17 @@ class MainWindow(QWidget):
         pass
 
     def loadData(self,logfilename,pointfilename):
-        #data loading here
+        #data loading
+        self.data=np.load(logfilename)
+        self.coursePoints=np.loadtxt(pointfilename,delimiter=',')
+        self.slider.setRange(0,self.data.shape[0]-1)
+        self.curIdx=0
+        self.radius=np.zeros(self.data.shape[0])
+        self.centerCoord=np.zeros((self.data.shape[0],2))
+        #calculate turning radius and speed
+        self.radius=0#need to be implemented
+        self.speed=0#need to be implemented
+
         self.showData()
     def preparePlotWindow(self):
         pass
