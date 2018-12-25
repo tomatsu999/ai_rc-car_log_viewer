@@ -1,2 +1,2 @@
 # ai_rc-car_log_viewer
-Tool for view log files of AI RC-car.
+I am developing AI RC-car using deep reinforcement learning with my friends. This is tool for viewing log files of the AI RC-car.
