@@ -90,8 +90,10 @@ class MainWindow(QWidget):
         self.centerCoord=np.zeros((self.data.shape[0],2))
         #calculate turning radius and speed
         self.radius=0#need to be implemented
-        self.speed=0#need to be implemented
-
+        self.speed=np.zeros(self.data.shape[0])
+        self.speed[2:]=(3600.0/1000.0) * \
+                        np.sqrt(np.sum((self.data[2:self.data.shape[0],9:11]-self.data[1:self.data.shape[0]-1,9:11])**2,axis=1))/ \
+                        (self.data[2:self.data.shape[0],12]-self.data[1:self.data.shape[0]-1,12])
         self.showData()
     def preparePlotWindow(self):
         pass
