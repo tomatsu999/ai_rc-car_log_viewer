@@ -89,12 +89,61 @@ class MainWindow(QWidget):
         self.radius=np.zeros(self.data.shape[0])
         self.centerCoord=np.zeros((self.data.shape[0],2))
         #calculate turning radius and speed
-        self.radius=0#need to be implemented
+        for i in range(2,self.data.shape[0]):
+            (self.radius[i],self.centerCoord[i,:])=self.turningRadius(self.data[(i-2):(i+1),9:11])
         self.speed=np.zeros(self.data.shape[0])
         self.speed[2:]=(3600.0/1000.0) * \
                         np.sqrt(np.sum((self.data[2:self.data.shape[0],9:11]-self.data[1:self.data.shape[0]-1,9:11])**2,axis=1))/ \
                         (self.data[2:self.data.shape[0],12]-self.data[1:self.data.shape[0]-1,12])
         self.showData()
+    def turningRadius(self,points):
+        epsilon=1e-20
+        #set invalid value if two points are same
+        if np.all(points[0,:]==points[1,:]) or np.all(points[1,:]==points[2,:]):
+            return((-1,np.array([-1,-1])))
+        #calculate perpendicular bisector(for 2 sets of points)
+        #line 1 (point 0 and 1)
+        med1=(points[0,:]+points[1,:])/2.0
+        vec1=points[0,:]-points[1,:]
+        if points[0,1]==points[1,1]:
+            vertical1=True
+            x1=med1[0]
+        else:
+            vertical1=False
+            a1=-vec1[0]/vec1[1]
+            b1=-med1[0]*a1+med1[1]
+        #line 1 (point 1 and 2)
+        med2=(points[1,:]+points[2,:])/2.0
+        vec2=points[1,:]-points[2,:]
+        if points[1,1]==points[2,1]:
+            vertical2=True
+            x2=med2[0]
+        else:
+            vertical2=False
+            a2=-vec2[0]/vec2[1]
+            b2=-med2[0]*a2+med2[1]
+
+        #calculate center of circle
+        if vertical1==True and vertical2==True:
+            #set invalid value if two lines are parallel(vertical)
+            return((-1,np.array([-1,-1])))
+        elif vertical1==True:
+            #case that line 1 is vertical
+            result_point=np.array([x1,x1*a2+b2])
+            result_radius=np.sqrt(np.sum((result_point-points[0,:])**2))
+        elif vertical2==True:
+            #case that line 2 is vertical
+            result_point=np.array([x2,x2*a1+b1])
+            result_radius=np.sqrt(np.sum((result_point-points[2,:])**2))
+        elif np.abs(a1-a2)<=epsilon:
+            #set invalid value if two lines are parallel
+            return((-100,np.array([-1,-1])))
+        else:
+            tmp_x=-(b1-b2)/(a1-a2)
+            result_point=np.array([tmp_x,tmp_x*a1+b1])
+            result_radius=np.sqrt(np.sum((result_point-points[0,:])**2))
+        return(result_radius,result_point)
+
     def preparePlotWindow(self):
         pass
     def sliderChanged(self,value):
