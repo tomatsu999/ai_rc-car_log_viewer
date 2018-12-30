@@ -145,7 +145,28 @@ class MainWindow(QWidget):
         return(result_radius,result_point)
 
     def preparePlotWindow(self):
-        pass
+        self.mapFigure,self.mapAxes=plt.subplots(figsize=(6,4))
+        self.mapAxes.set_title('course map')
+        self.mapAxes.plot([0],[0])
+
+        #self.mapAxes.title.set_text('course map')
+        self.valFigure,self.valAxes=plt.subplots(11,1,figsize=(2,6))
+        #self.valFigure=plt.figure(figsize=(2,6))#plt.subplots(9,1,figsize=(2,6))
+        #self.valAxes=[None]*9
+        for i in range(11):
+            #self.valAxes[i]=self.valFigure.add_subplot(5,2,i+1)
+            self.valAxes[i].plot([0])
+            
+        self.valAxes[0].set_title('distance 0')
+        self.valAxes[1].set_title('distance 45')
+        self.valAxes[2].set_title('distance 90')
+        self.valAxes[3].set_title('distance 135')
+        self.valAxes[4].set_title('distance 180')
+        self.valAxes[5].set_title('distance 110')
+        self.valAxes[6].set_title('distance 70')
+        self.valAxes[7].set_title('steer')
+        self.valAxes[8].set_title('speed')
+        plt.show(block=False)
     def sliderChanged(self,value):
         pass
     def showData(self):
