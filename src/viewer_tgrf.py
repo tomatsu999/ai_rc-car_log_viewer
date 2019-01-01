@@ -170,7 +170,37 @@ class MainWindow(QWidget):
     def sliderChanged(self,value):
         pass
     def showData(self):
-        pass
+        #print(value)
+        car_center=self.data[self.curIdx,9:11]
+        if self.data.shape[1]<=13:
+            car_center_old=self.data[self.curIdx-1,9:11]
+        else:
+            car_center_old=self.data[self.curIdx,13:15]
+        #(distances,linePoints,sensedPoints)=converter.convert2(car_center,car_center_old)
+        MAX_DIST=10
+        ANGLES_SENSORS=[0, 45, 90, 135, 180, 110, 70]
+        angles=-(np.array(ANGLES_SENSORS)-90.0)*math.pi/180.0
+        linePointsMax=converter_tgrf.line(car_center,2*car_center-car_center_old,angles,MAX_DIST)
+        linePoints=converter_tgrf.line(car_center,2*car_center-car_center_old,angles,self.data[self.curIdx,:7])
+        self.mapAxes.cla()
+        self.mapAxes.plot(self.data[:,9],-self.data[:,10],'y--')
+        self.mapAxes.plot(self.coursePoints[:,0],-self.coursePoints[:,1],'k.')
+        
+        #sensed point
+        for i in range(7):
+            self.mapAxes.plot(linePointsMax[i][:,0],-linePointsMax[i][:,1],'--c')
+            self.mapAxes.plot(linePoints[i][:,0],-linePoints[i][:,1],'-b')
+        #self.mapAxes.plot(sensedPoints[:,0],-sensedPoints[:,1],'.r')
+
+        #car point
+        self.mapAxes.plot(self.data[self.curIdx,9],-self.data[self.curIdx,10],'mo')
+        if self.curIdx>=1:
+            self.mapAxes.plot(self.data[self.curIdx-1,9],-self.data[self.curIdx-1,10],'g.')
+        if self.curIdx>=2:
+            self.mapAxes.plot(self.data[self.curIdx-2,9],-self.data[self.curIdx-2,10],'g.')
+        if 100>=self.radius[self.curIdx]>=0:
+            c=patches.Circle(xy=(self.centerCoord[self.curIdx,0], -self.centerCoord[self.curIdx,1]), radius=self.radius[self.curIdx], ec='#888888',fill=False)
+            self.mapAxes.add_patch(c)
         
 
 if __name__ == '__main__':
