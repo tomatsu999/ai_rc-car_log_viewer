@@ -168,7 +168,8 @@ class MainWindow(QWidget):
         self.valAxes[8].set_title('speed')
         plt.show(block=False)
     def sliderChanged(self,value):
-        pass
+        self.curIdx=value
+        self.showData()
     def showData(self):
         #print(value)
         car_center=self.data[self.curIdx,9:11]
