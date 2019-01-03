@@ -203,6 +203,30 @@ class MainWindow(QWidget):
             c=patches.Circle(xy=(self.centerCoord[self.curIdx,0], -self.centerCoord[self.curIdx,1]), radius=self.radius[self.curIdx], ec='#888888',fill=False)
             self.mapAxes.add_patch(c)
         
+        #graph
+        startIdx=max(0,self.curIdx-30)
+        for i in range(7):
+            self.valAxes[i].cla()
+            self.valAxes[i].plot(self.data[startIdx:self.curIdx+1,i],'b')
+        for i in range(7,9):
+            self.valAxes[i].cla()
+            self.valAxes[i].plot(self.data[startIdx:self.curIdx+1,i],'g')
+        self.valAxes[9].cla()
+        self.valAxes[9].plot(self.speed[startIdx:self.curIdx+1],'r')
+        self.valAxes[10].cla()
+        self.valAxes[10].plot(self.radius[startIdx:self.curIdx+1],'r')
+        for i in range(9):
+            self.outputLine[i].setText("%.4f" % self.data[self.curIdx,i])
+        self.outputLine[9].setText("%.4f" % self.data[self.curIdx,12])
+
+        self.outputLine[10].setText("%.4f" % self.speed[self.curIdx])
+        self.outputLine[11].setText("%.4f" % self.radius[self.curIdx])
+
+        self.idxLine.setText(str(self.curIdx))
+        self.mapAxes.set_xlim([-RADIOUS_INNER,RADIOUS_OUTER*2+STRAIGHT_LEN+RADIOUS_INNER])
+        self.mapAxes.set_ylim([-RADIOUS_OUTER*2-RADIOUS_INNER,RADIOUS_INNER])
+        self.mapFigure.canvas.draw()
+        self.valFigure.canvas.draw()
 
 if __name__ == '__main__':
     import sys
