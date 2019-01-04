@@ -71,14 +71,25 @@ class MainWindow(QWidget):
 
         self.setLayout(mainLayout)
         self.setWindowTitle("Log Viewer")
+
     def jump(self):
-        pass
+        idx=int(self.idxLine.text())
+        if 0<idx<self.data.shape[0]:
+            self.slider.setValue(idx)
+            self.curIdx=idx
+            self.showData()
     def goPrev(self):
-        pass
+        if self.curIdx>0:
+            self.curIdx-=1
+            self.showData()
     def goNext(self):
-        pass
+        if self.curIdx<self.data.shape[0]-1:
+            self.curIdx+=1
+            self.showData()
     def quit(self):
-        pass
+        plt.close(self.mapFigure)
+        plt.close(self.valFigure)
+        self.close()
 
     def loadData(self,logfilename,pointfilename):
         #data loading
