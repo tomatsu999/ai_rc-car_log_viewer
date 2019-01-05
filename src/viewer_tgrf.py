@@ -18,6 +18,7 @@ class MainWindow(QWidget):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
+        #Creating GUI parts
         self.slider = QSlider(PyQt5.QtCore.Qt.Horizontal)
         self.slider.valueChanged[int].connect(self.sliderChanged)
         self.idxLine = QLineEdit()
@@ -36,6 +37,7 @@ class MainWindow(QWidget):
         self.jumpButton = QPushButton("&jump")
         self.jumpButton.clicked.connect(self.jump)
 
+        #Adding GUI parts to grid layout
         lineLayout = QGridLayout()
         lineLayout.addWidget(QLabel("slider"), 0, 0)
         lineLayout.addWidget(self.slider, 0, 1)
@@ -73,20 +75,24 @@ class MainWindow(QWidget):
         self.setWindowTitle("Log Viewer")
 
     def jump(self):
+        #jumping to specified time idx
         idx=int(self.idxLine.text())
         if 0<idx<self.data.shape[0]:
             self.slider.setValue(idx)
             self.curIdx=idx
             self.showData()
     def goPrev(self):
+        #going to previous time idx
         if self.curIdx>0:
             self.curIdx-=1
             self.showData()
     def goNext(self):
+        #going to next time idx
         if self.curIdx<self.data.shape[0]-1:
             self.curIdx+=1
             self.showData()
     def quit(self):
+        #closing all window of this tool
         plt.close(self.mapFigure)
         plt.close(self.valFigure)
         self.close()
@@ -156,16 +162,14 @@ class MainWindow(QWidget):
         return(result_radius,result_point)
 
     def preparePlotWindow(self):
+        #Preparing window(size, title, etc.)
         self.mapFigure,self.mapAxes=plt.subplots(figsize=(6,4))
         self.mapAxes.set_title('course map')
         self.mapAxes.plot([0],[0])
 
-        #self.mapAxes.title.set_text('course map')
         self.valFigure,self.valAxes=plt.subplots(11,1,figsize=(2,6))
-        #self.valFigure=plt.figure(figsize=(2,6))#plt.subplots(9,1,figsize=(2,6))
-        #self.valAxes=[None]*9
+
         for i in range(11):
-            #self.valAxes[i]=self.valFigure.add_subplot(5,2,i+1)
             self.valAxes[i].plot([0])
             
         self.valAxes[0].set_title('distance 0')
@@ -179,30 +183,33 @@ class MainWindow(QWidget):
         self.valAxes[8].set_title('speed')
         plt.show(block=False)
     def sliderChanged(self,value):
+        #Updating time Idx and update graph and texts
         self.curIdx=value
         self.showData()
     def showData(self):
-        #print(value)
+        #calculating sensor points
         car_center=self.data[self.curIdx,9:11]
         if self.data.shape[1]<=13:
             car_center_old=self.data[self.curIdx-1,9:11]
         else:
             car_center_old=self.data[self.curIdx,13:15]
-        #(distances,linePoints,sensedPoints)=converter.convert2(car_center,car_center_old)
         MAX_DIST=10
         ANGLES_SENSORS=[0, 45, 90, 135, 180, 110, 70]
         angles=-(np.array(ANGLES_SENSORS)-90.0)*math.pi/180.0
         linePointsMax=converter_tgrf.line(car_center,2*car_center-car_center_old,angles,MAX_DIST)
         linePoints=converter_tgrf.line(car_center,2*car_center-car_center_old,angles,self.data[self.curIdx,:7])
         self.mapAxes.cla()
+
+        #showing car trajectory
         self.mapAxes.plot(self.data[:,9],-self.data[:,10],'y--')
+
+        #showing course points
         self.mapAxes.plot(self.coursePoints[:,0],-self.coursePoints[:,1],'k.')
         
         #sensed point
         for i in range(7):
             self.mapAxes.plot(linePointsMax[i][:,0],-linePointsMax[i][:,1],'--c')
             self.mapAxes.plot(linePoints[i][:,0],-linePoints[i][:,1],'-b')
-        #self.mapAxes.plot(sensedPoints[:,0],-sensedPoints[:,1],'.r')
 
         #car point
         self.mapAxes.plot(self.data[self.curIdx,9],-self.data[self.curIdx,10],'mo')
@@ -234,16 +241,24 @@ class MainWindow(QWidget):
         self.outputLine[11].setText("%.4f" % self.radius[self.curIdx])
 
         self.idxLine.setText(str(self.curIdx))
+
+        #set area of the graph
         self.mapAxes.set_xlim([-RADIOUS_INNER,RADIOUS_OUTER*2+STRAIGHT_LEN+RADIOUS_INNER])
         self.mapAxes.set_ylim([-RADIOUS_OUTER*2-RADIOUS_INNER,RADIOUS_INNER])
+
+        #updating graph
         self.mapFigure.canvas.draw()
         self.valFigure.canvas.draw()
 
 if __name__ == '__main__':
-    import sys
+    #Creating window
     app = QApplication(sys.argv)
     main_window = MainWindow()
     main_window.preparePlotWindow()
+
+    #Loading course point file
     main_window.loadData(sys.argv[1],"points_tgrf.csv")
+
+    #Showing window
     main_window.show()
     sys.exit(app.exec_())
